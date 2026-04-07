@@ -208,7 +208,6 @@ def mostrar_cabecalho(titulo: str) -> None:
     
     print(f"\n{barra} {titulo} {barra}\n")
 
-
 def visualizacao_do_menu(*menus: list[str]) -> None:
     """
     Pega menus feitas(uma lista), então númera os de 1 à quantia total, e formata 
@@ -314,13 +313,16 @@ def cria_cadastro(nome: str, idade: int, nivel: int, criacao: datetime, modifica
           }
     }
 
+def recuo(n: int) -> str:
+    "Retorna string de recuo para dá margem a outras mensagens."
+    ESPACO = ' '
+    return ESPACO * n
+
 def entrada_de_cadastro_agora() -> dict:
     "Realiza um cadastro agora, então envia o dicionário formado dele."
-    ESPACO = ' '
-    RECUO = ESPACO * 4
-    nome = input(f"\n{RECUO}Nome do paciente: ")
-    idade = int(input(f"{RECUO}Sua idade: "))
-    nivel_de_dor = int(input(f"{RECUO}Nível de dor[1 à 5]: "))
+    nome = input(f"\n{recuo(4)}Nome do paciente: ")
+    idade = int(input(f"{recuo(4)}Sua idade: "))
+    nivel_de_dor = int(input(f"{recuo(4)}Nível de dor[1 à 5]: "))
     criacao = datetime.today()
     # Jeito de fazer clone da variável 'criação'.
     modificacao = criacao + timedelta(seconds=0)
