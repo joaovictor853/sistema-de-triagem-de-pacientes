@@ -7,7 +7,14 @@ from os import (popen)
 from sys import (executable as CAMINHO_DO_INTERPLETADOR_PYTHON)
 from pprint import (pprint)
 from random import (choice, randint)
-from datetime import (datetime)
+from datetime import (datetime, timedelta)
+# Módulos da própria biblioteca:
+from bancodedados import (
+        adiciona_cadastro, 
+        carrega_banco_de_dados, 
+        salva_banco_de_dados
+        )
+
 
 def lista_de_nomes() -> list[str]:
     "Retorna uma liista de nomes, estes que estão no arquivo de amostra."
@@ -43,7 +50,7 @@ def cria_cadastro_aleatorio() -> dict:
     """
     nome = seleciona_nome_aleatorio(lista_de_nomes())
     criacao = datetime_aleatorio()
-    modificacao = criacao 
+    modificacao = criacao + timedelta(seconds=0)
     idade = randint(1, 70)
     nivel = randint(1, 5)
 
@@ -72,16 +79,85 @@ def executa_programa_e_adiciona_um_cadastro_no_momento(cadastro: dict) -> None:
     # transformar em string e formatar algumas variáveis. Como mostrado acima,
     # nem todos valores dado pelo dício serão usados. Este tipo de inserção cria  os 
     # selos de tempo no momento.
-    ARGUMENTOS_COM_FIM_DE_LINHA = ["adicionar\n", f"{nome}\n", f"{idade}\n", f"{nivel}\n" ]
+    ARGUMENTOS_COM_QUEBRA_DE_LINHA = [
+        b"adicionar\n", nome.encode(encoding='utf8') + b'\n',
+        f"{idade}\n".encode(), 
+        f"{nivel}\n".encode(), b"sair\n"
+    ]
     processo = Popen(
-        [CAMINHO_DO_INTERPLETADOR_PYTHON, "-OO", "-B", "main.py"], 
-        stdin=PIPE, text=True, stdout=DEVNULL
+        [CAMINHO_DO_INTERPLETADOR_PYTHON, "-B", "-OO", "main.py"],
+        stdin=PIPE, stdout=DEVNULL
     )
     
-    for argumento in ARGUMENTOS_COM_FIM_DE_LINHA:
-        processo.stdin.write(argumento)
-        processo.stdin.flush()
+    for valor in ARGUMENTOS_COM_QUEBRA_DE_LINHA:
+        try:
+            processo.stdin.write(valor)
+            processo.stdin.flush()
+        except EOFError:
+            processo.stdin.writeline(valor)
+            processo.stdin.flush()
+            print("Foi inserido via 'comunicate'.")
+        
+    print("Cadastro abaixo inserido com sucesso de forma automática:")
+    pprint(cadastro, indent=4)
+   
+def adiciona_um_cadastro_de_forma_direta(cadastro: dict) -> None:
+    """
+    Adiciona o cadastro dado, sem a execução do programa. Tratando diretamente com
+    o banco de dados(arquivo JSON).
+    """
+    carrega_banco_de_dados()
+    novo = cria_cadastro_aleatorio()
+    pprint(novo)
+    adiciona_cadastro(novo)
+    salva_banco_de_dados()
     
+if __name__ == "__main__":
+    # Cria um cadastro agora, inserindo nome, idade e nível de dor apenas.
+    executa_programa_e_adiciona_um_cadastro_no_momento(cria_cadastro_aleatorio())
 
-# Cria um cadastro agora, inserindo nome, idade e nível de dor apenas.
-executa_programa_e_adiciona_um_cadastro_no_momento(cria_cadastro_aleatorio())
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
+#                                Testes Unitários                                           #
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
+from unittest import (TestCase, skip)
+
+@skip("Cuidado! Altera o banco de dados principal.")
+class InsercaoAutomaticaDeCadastro(TestCase):
+    def runTest(self):
+        cadastro = cria_cadastro_aleatorio()
+        pprint(cadastro)    
+        adiciona_um_cadastro_de_forma_direta(cadastro)
+        pprint(cadastro)
+        print("Cadastro realizado com sucesso.", end='\n\n')
+            
+            
+@skip("Cuidado! Altera o banco de dados principal.")            
+class InsercoesAutomaticaDeCadastros(TestCase):
+    def runTest(self):
+        for _ in range(randint(2, 5)):
+            cadastro = cria_cadastro_aleatorio()
+            
+            adiciona_um_cadastro_de_forma_direta(cadastro)
+            pprint(cadastro)
+            print("Cadastro realizado com sucesso.", end='\n\n')
+            
+@skip("Cuidado! Altera o banco de dados principal.")
+class UmaInsercaoBasicaManualNoBanco(TestCase):
+    def runTest(self):
+        ARGUMENTOS = [b"Adicionar\n", 
+                      "Mária Conceissão Taváres\n".encode(encoding="utf8"),
+                      "56\n".encode(), "1\n".encode()
+                      ]
+        handle = Popen(
+            [CAMINHO_DO_INTERPLETADOR_PYTHON, "main.py"],
+            stdin=PIPE, stdout=DEVNULL
+        )
+        
+        for arg in ARGUMENTOS:
+            handle.stdin.write(arg)
+            handle.stdin.flush()
+            argumento = arg.decode(encoding="utf8").strip('\n')
+            print(f"Escrito argumento '{argumento}' com sucesso.")
+        else:
+            handle.stdin.write(b"sair\n")
+        print("Um cadastro foi inserido com sucesso.")
