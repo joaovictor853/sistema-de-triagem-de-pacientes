@@ -23,18 +23,7 @@ from copy import (copy as CopiaObjeto)
 CAMINHO_DO_BANCO = "dados/cadastros.json"
 LISTA_DE_NOMES = "dados/testes/lista-de-nomes.txt"
 BANCO_DE_DADOS_CADASTROS = []
-# Nome genérico que "inventei". Na verdade, pedir para o 'Gemini' criar tal, mas baseado no seguinte
-# prompt: "Pode sugerir-me um nome de hospital, um que remeta a uma instituição antiga e respeitada."
-# A resposta dele foi a seguinte lista, e mais paragrafos e paragros de explicação porque estas escolhas:
-#
-#    Hospital Memorial Cândido Ferreira
-#    Centro Hospitalar Acadêmico Silva Brandão
-#    Real Beneficência da Colina
-#    Hospital da Santa Perseverança
-#    Sociedade Hospitalar Dom Pedro II
-#    Hospital Sancta Vita
-#    Hospital Magnus Curatio
-#    Instituto Salus
+
 
 def adiciona_cadastro(registro: dict) -> None:
     "Apenas adiciona um 'cadastro' dado no banco de dados carregado na memória."
@@ -162,6 +151,7 @@ class MexendoComJSON(TestCase):
                 {"vitor": datetime.today().timestamp()}
             ]
             json.dump(amostras, database, indent=5)
+
 """
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
 							Módulo Específico a Interface
@@ -169,6 +159,18 @@ class MexendoComJSON(TestCase):
 """
 import shutil
 
+# Nome genérico que "inventei". Na verdade, pedir para o 'Gemini' criar tal, mas baseado no seguinte
+# prompt: "Pode sugerir-me um nome de hospital, um que remeta a uma instituição antiga e respeitada."
+# A resposta dele foi a seguinte lista, e mais paragrafos e paragros de explicação porque estas escolhas:
+#
+#    Hospital Memorial Cândido Ferreira
+#    Centro Hospitalar Acadêmico Silva Brandão
+#    Real Beneficência da Colina
+#    Hospital da Santa Perseverança
+#    Sociedade Hospitalar Dom Pedro II
+#    Hospital Sancta Vita
+#    Hospital Magnus Curatio
+#    Instituto Salus
 NOME_DO_HOSPITAL = "Centro Hospitalar Acadêmico Silva Brandão"
 
 def barra_do_tamanho_da_tela(componente: str) -> str:
@@ -413,7 +415,7 @@ class PrototipoPrograma(TestCase):
 lá, será copiado e colocado aqui.
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
 """
-MENU_DE_OPCOES = ["Adicionar", "Remover", "Listar","Ajuda", "Sair"]
+MENU_DE_OPCOES = ["Adicionar", "Remover", "Listar", "Ajuda", "Sair"]
 
 carrega_banco_de_dados()
 cabecalho_padrao_do_hospital()
