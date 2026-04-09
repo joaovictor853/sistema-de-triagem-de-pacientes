@@ -101,51 +101,66 @@ def executa_programa_e_adiciona_um_cadastro_no_momento(cadastro: dict) -> None:
     print("Cadastro abaixo inserido com sucesso de forma automática:")
     pprint(cadastro, indent=4)
    
-def adiciona_um_cadastro_de_forma_direta(cadastro: dict) -> None:
+def adiciona_um_cadastro_de_forma_direta(novo: dict) -> None:
     """
     Adiciona o cadastro dado, sem a execução do programa. Tratando diretamente com
     o banco de dados(arquivo JSON).
     """
     carrega_banco_de_dados()
-    novo = cria_cadastro_aleatorio()
-    pprint(novo)
     adiciona_cadastro(novo)
-    salva_banco_de_dados()
+    salva_banco_de_dados() 
+    print(f"""
+          \rO cadastro abaixo foi adicionado com sucesso:
+          \r\t{str(novo)}
+          """)
     
 if __name__ == "__main__":
     # Cria um cadastro agora, inserindo nome, idade e nível de dor apenas.
-    executa_programa_e_adiciona_um_cadastro_no_momento(cria_cadastro_aleatorio())
+    #executa_programa_e_adiciona_um_cadastro_no_momento(cria_cadastro_aleatorio())
+    #adiciona_um_cadastro_de_forma_direta(cria_cadastro_aleatorio())
+    pass
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Testes Unitários                                           #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 from unittest import (TestCase, skip)
-
-@skip("Cuidado! Altera o banco de dados principal.")
+from time import (sleep)
+@skip("Cuidado! Altera o arquivo JSON(banco de dados), insere um cadastro aleatório.")
 class InsercaoAutomaticaDeCadastro(TestCase):
     def runTest(self):
+        carrega_banco_de_dados()
         cadastro = cria_cadastro_aleatorio()
-        pprint(cadastro)    
-        adiciona_um_cadastro_de_forma_direta(cadastro)
-        pprint(cadastro)
+        
+        pprint(cadastro)   
+        adiciona_cadastro(cadastro)
+        salva_banco_de_dados() 
         print("Cadastro realizado com sucesso.", end='\n\n')
-            
-            
-@skip("Cuidado! Altera o banco de dados principal.")            
-class InsercoesAutomaticaDeCadastros(TestCase):
+
+class InsercoesAutomaticasEmSerie(TestCase):
     def runTest(self):
-        for _ in range(randint(2, 5)):
-            cadastro = cria_cadastro_aleatorio()
-            
-            adiciona_um_cadastro_de_forma_direta(cadastro)
-            pprint(cadastro)
-            print("Cadastro realizado com sucesso.", end='\n\n')
-            
-@skip("Cuidado! Altera o banco de dados principal.")
+        X = randint(2, 5)
+        amostras = [cria_cadastro_aleatorio() for _ in range(X)]
+        
+        print(f"Serão inseridas {X} ao total.")
+        
+        for p in range(X):
+            try:
+                adiciona_um_cadastro_de_forma_direta(amostras[p])
+            except AttributeError as erro:
+                print(amostras[p])
+                print(f"Falhou no {p + 1}! ({erro})")
+            sleep(3.0)
+
+class InsercaoDiretaManualComMecanismoAutomatico(TestCase):
+    def runTest(self):
+        adiciona_um_cadastro_de_forma_direta(cria_cadastro_aleatorio())
+        adiciona_um_cadastro_de_forma_direta(cria_cadastro_aleatorio())
+        
+@skip("Alterar o banco de dados, alem de inserir a mesma entrada sempre!")           
 class UmaInsercaoBasicaManualNoBanco(TestCase):
     def runTest(self):
         ARGUMENTOS = [b"Adicionar\n", 
-                      "Mária Conceissão Taváres\n".encode(encoding="utf8"),
+                      "Mária Conceição Taváres\n".encode(encoding="utf8"),
                       "56\n".encode(), "1\n".encode()
                       ]
         handle = Popen(
