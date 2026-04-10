@@ -1,8 +1,11 @@
+# Biblioteca padrão do Python:
 import json
 from random import (choice, randint)
 from datetime import (timedelta, datetime)
 from pprint import (pprint)
 from copy import (copy as CopiaObjeto)
+# Módulos pro próprio projeto:
+from modelos import (cadastro_e_valido)
 
 # O banco de dados dele é uma lista que contém todas pessoas já cadastradas pelo programa. Dentro dele,
 # cada cadastro será um dicionário do tipo 'string' e 'tupla'. A string é equivalente ao nome do 
@@ -17,9 +20,13 @@ BANCO_DE_DADOS_CADASTROS = []
 
 def adiciona_cadastro(registro: dict) -> None:
     "Apenas adiciona um 'cadastro' dado no banco de dados carregado na memória."
-    assert isinstance(registro, dict)
     global BANCO_DE_DADOS_CADASTROS, adicoes
-
+    
+    if not cadastro_e_valido:
+        if __debug__:
+            print(registro)
+        raise ValueError("Este tipo de dado não é válido.")
+        
     BANCO_DE_DADOS_CADASTROS.append(registro)
     adicoes += 1
 
@@ -80,6 +87,12 @@ def converte_o_datetime_num_timestamp(registro: dict) -> dict:
     O dicionário aqui passado é alterado. A função também retorna a referência
     do  mesmo objeto.
     """
+    
+    if not cadastro_e_valido:
+        if __debug__:
+            print(registro)
+        raise ValueError("Este tipo de dado não é válido.")
+    
     dicio = registro
     
     for nome in registro:
@@ -92,7 +105,11 @@ def converte_o_datetime_num_timestamp(registro: dict) -> dict:
     return registro
 
 def converte_o_timestamp_num_datetime(cadastro: dict) -> None:
-    assert isinstance(cadastro, dict)
+    if not cadastro_e_valido:
+        if __debug__:
+            print(registro)
+        raise ValueError("Este tipo de dado não é válido.")
+    
     dicio = cadastro
     
     for nome in cadastro:

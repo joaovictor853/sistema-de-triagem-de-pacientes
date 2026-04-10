@@ -1,6 +1,8 @@
+# Biblioteca padrão do Python:
 import shutil
 from unittest import (TestCase)
 from datetime import (datetime, timedelta)
+# Módulos pro próprio projeto:
 from bancodedados import (BANCO_DE_DADOS_CADASTROS)
 from modelos import (cria_cadastro)
 
