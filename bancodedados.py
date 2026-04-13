@@ -1,11 +1,8 @@
-# Biblioteca padrão do Python:
 import json
 from random import (choice, randint)
 from datetime import (timedelta, datetime)
 from pprint import (pprint)
 from copy import (copy as CopiaObjeto)
-# Módulos pro próprio projeto:
-from modelos import (cadastro_e_valido)
 
 # O banco de dados dele é uma lista que contém todas pessoas já cadastradas pelo programa. Dentro dele,
 # cada cadastro será um dicionário do tipo 'string' e 'tupla'. A string é equivalente ao nome do 
@@ -14,25 +11,30 @@ from modelos import (cadastro_e_valido)
 CAMINHO_DO_BANCO         = "dados/cadastros.json"
 LISTA_DE_NOMES           = "dados/testes/lista-de-nomes.txt"
 BANCO_DE_DADOS_CADASTROS = []
-BDD_INCIALIZADO          = False
 # Contagem de adições e remoções realizadas no sistema de cadastros.
 (adicoes, remocoes) = (0, 0)
 
 
 def adiciona_cadastro(registro: dict) -> None:
     "Apenas adiciona um 'cadastro' dado no banco de dados carregado na memória."
+    assert isinstance(registro, dict)
     global BANCO_DE_DADOS_CADASTROS, adicoes
-    
-    if not cadastro_e_valido:
-        if __debug__:
-            print(registro)
-        raise ValueError("Este tipo de dado não é válido.")
-        
+
     BANCO_DE_DADOS_CADASTROS.append(registro)
     adicoes += 1
 
-def remove_cadastro(nome: str, id: int) -> bool:
-    raise NotImplementedError("Tem que pensar ainda no mecanismo.")
+def remove_cadastro(nome: str) -> bool:
+    assert isinstance(nome, str)
+    global BANCO_DE_DADOS_CADASTROS, remocoes
+    #
+    for registro in BANCO_DE_DADOS_CADASTROS:
+        for nome_chave in registro.keys():
+            if nome_chave.lower() == nome.lower():
+                BANCO_DE_DADOS_CADASTROS.remove(registro)
+                remocoes += 1
+                return True
+    return False
+   
 
 def salva_banco_de_dados() -> None:
     """
@@ -69,30 +71,16 @@ def carrega_banco_de_dados() -> None:
     dados. Observe que o algoritmo não apaga as outras já carregadas, apenas adiciona 
     novas.
     """
-    global BANCO_DE_DADOS_CADASTROS, BDD_INCIALIZADO
+    global BANCO_DE_DADOS_CADASTROS
 
-    # Apenas carrega uma única vez por programa.
-    if (not BDD_INCIALIZADO):
-        # Modifica novamente o 'timestamp' para um 'datetime'.
-        for dicio in carrega_cadastros_do_banco_de_dados_json():
-            converte_o_timestamp_num_datetime(dicio)
-            # Adiciona no banco de dados carregado na memória.
-            BANCO_DE_DADOS_CADASTROS.append(dicio)
-        # Informando que a instância já foi inicializada.
-        BDD_INCIALIZADO = True
+    # Modifica novamente o 'timestamp' para um 'datetime'.
+    for dicio in carrega_cadastros_do_banco_de_dados_json():
+        converte_o_timestamp_num_datetime(dicio)
+        # Adiciona no banco de dados carregado na memória.
+        BANCO_DE_DADOS_CADASTROS.append(dicio)
         
     print("O banco de dados foi carregado com sucesso.")
 
-def todos_cadastros() -> list[dict]:
-    """
-    Retorna uma copia dos cadastros na memória. É uma cópia, e não a referência
-    original, já que se fosse este último, qualquer alteração, mexeria no
-    banco em sí.
-    """
-    if (not BDD_INCIALIZADO):
-        raise Exception("É preciso inicializar o BDD primeiro antes de chamar tal função")
-    else:
-        return BANCO_DE_DADOS_CADASTROS[:]
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Funções Auxiliares                                         #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
@@ -102,12 +90,6 @@ def converte_o_datetime_num_timestamp(registro: dict) -> dict:
     O dicionário aqui passado é alterado. A função também retorna a referência
     do  mesmo objeto.
     """
-    
-    if not cadastro_e_valido:
-        if __debug__:
-            print(registro)
-        raise ValueError("Este tipo de dado não é válido.")
-    
     dicio = registro
     
     for nome in registro:
@@ -120,11 +102,7 @@ def converte_o_datetime_num_timestamp(registro: dict) -> dict:
     return registro
 
 def converte_o_timestamp_num_datetime(cadastro: dict) -> None:
-    if not cadastro_e_valido:
-        if __debug__:
-            print(registro)
-        raise ValueError("Este tipo de dado não é válido.")
-    
+    assert isinstance(cadastro, dict)
     dicio = cadastro
     
     for nome in cadastro:
