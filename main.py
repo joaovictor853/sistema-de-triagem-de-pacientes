@@ -115,7 +115,7 @@ carrega_banco_de_dados()
 # Cabeçalho da abertura do programa.
 cabecalho_padrao_do_hospital()
 
-
+# Laço infinito, assim fica pedindo o que o usuário deseja executar nele.
 while True:
     # Mostra o menu se não a primeira vez, então novamente. 
     visualizacao_do_menu(*MENU_DE_OPCOES)
