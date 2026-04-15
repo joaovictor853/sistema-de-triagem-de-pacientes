@@ -1,13 +1,18 @@
 """
 Script insere entradas do banco no site.
 """
+from unittest import (TestCase)
+from random import (choice)
 from bancodedados import (carrega_banco_de_dados, todos_cadastros, )
 from interface import (NOME_DO_HOSPITAL)
 from modelos import (traducao_do_nivel_de_dor, nome_cadastro, idade_cadastro,
-                     nivel_de_dor_cadastro)
+                     nivel_de_dor_cadastro, cadastro_e_valido,
+                     criacao_cadastro)
 
 
-# Como esta parte é meio que estática, pode ser definida na inicialização.
+# Como esta parte é meio que estática, pode ser definida na inicialização. Viram simples
+# constantes no programa. Nenhuma formatação é feita, simples trechos copiados dos
+# e ligados a variáveis(como dissoe, constantes).
 COMENTARIO_DA_PAGINA = """
 <!--  
   Prompt que foi necessário para gerar, ao menos o básico desta página, com o 
@@ -37,43 +42,142 @@ CABECALHO_DA_PAGINA = f"""
     <hr size="2" color="#30363d" width="90%">
     <br>
 """
+CONFIGURACAO_DO_CORPO = """
+<body text="#c9d1d9" bgcolor="#0d1117" style="font-family: Arial, sans-serif; padding: 20px;">
+"""
+TAGS_FINAIS = "</body>\n</html>\n"
 
-def cria_cabecalho_da_tabela() -> str:
-    return ("""
-       <tr bgcolor="#21262d" style="text-align: left; font-size: 18px; color: #ffffff;">
-            <th width="10%">Nome</th>
-            <th width="20%", align="center">Idade</th>
-            <th width="25%">Nível de Dor</th>
-            <th width="15%">Entrada</th>
-        </tr>
-    """)
-    
-def cria_linha_da_tabela(cadastro: dict) -> str:
+
+
+def cor_especifica_para_nivel_de_dor(nivel: int) -> str:
+    assert isinstance(nivel, int)
+
+    match nivel:
+        case 5:
+            return "#f50000"
+        case 4:
+            return "#c4006f"
+        case 3:
+            return "#f5b700"
+        case 2:
+            return '#03559e'
+        case 1:
+            return "#6ed900"
+        case _:
+            raise ValueError("Não existe este nível!")
+
+def cria_linha_da_tabela(cadastro: dict, paleta:str = None) -> str:
+    "Seleciona cor baseado no nível de gravidade para coloração do texto na página."
     assert cadastro_e_valido(cadastro)
     
     NOME_DO_PACIENTE = nome_cadastro(cadastro)
     SUA_IDADE = idade_cadastro(cadastro)
     NIVEL = nivel_de_dor_cadastro(cadastro)
-    ESTADO_DE_SAUDE = traducao_do_nivel_de_dor(NIVEL)
+    ESTADO_DE_SAUDE = traducao_do_nivel_de_dor(NIVEL).capitalize()
     DATA_DE_ENTRADA = criacao_cadastro(cadastro).strftime("%d de %b de %Y as %H%p")
+    COR = cor_especifica_para_nivel_de_dor(NIVEL)
     
-    return f"""
-        <tr>
-            <td><b>{NOME_DO_PACIENTE}</b></td>
-            <td align="center">{SUA_IDADE}</td>
-            <td style='color: yellow'><b>{ESTADO_DE_SAUDE}</b></td>
-            <td>{DATA_DE_ENTRADA}</td>
-        </tr>
-    """
-
-def cria_a_tabela_baseano_nos_cadastros() -> str:
+    if paleta is None:
+        return f"""
+        \r        <tr>
+        \r            <td><b>{NOME_DO_PACIENTE}</b></td>
+        \r            <td align="center">{SUA_IDADE}</td>
+        \r            <td style='color:{COR}'><b>{ESTADO_DE_SAUDE}</b></td>
+        \r            <td>{DATA_DE_ENTRADA}</td>
+        \r        </tr>
+            """
+    else:
+        return f"""
+        \r        <tr bgcolor="{paleta}">
+        \r            <td><b>{NOME_DO_PACIENTE}</b></td>
+        \r            <td align="center">{SUA_IDADE}</td>
+        \r            <td style='color:{COR}'><b>{ESTADO_DE_SAUDE}</b></td>
+        \r            <td>{DATA_DE_ENTRADA}</td>
+        \r        </tr>
+            """
+        
+def transforma_cadastros_em_linhas_de_tabela(lista: list[dict]) -> str:
     CONFIGURACAO_DA_TABELA = """
         <table align="center" width="90%" cellpadding="15" cellspacing="0" style="background-color: #161b22; border-radius: 12px; overflow: hidden; border: 1px solid #30363d;">
     """
-    
-    return f"""
-        {CONFIGURACAO_DA_TABELA}
-        </table>
+    LINHA_DE_LEGENDAS_DA_TABELA = """
+        <tr bgcolor="#21262d" style="text-align: left; font-size: 18px; color: #ffffff;">
+            <th width="10%">Nome</th>
+            <th width="20%", align="center">Idade</th>
+            <th width="25%">Nível de Dor</th>
+            <th width="15%">Entrada</th>
+        </tr>
     """
-carrega_banco_de_dados()
-LISTA_DE_CADASTROS = todos_cadastros()
+    cursor = 0
+    PALETAS = ["#161b22", "#0d1117",]
+    linhas = []
+
+    # Iterando e transformando cada cadastro na seguinte linha em HTML.
+    for cadastro in lista:
+        paleta = PALETAS[cursor % 2]
+        transformacao = cria_linha_da_tabela(cadastro, paleta)
+        linhas.append(transformacao)
+        cursor += 1
+    # Concatena todos os "parsers" realizados.
+    LINHAS = "\n".join(linhas)
+
+    # A tabulação tem que ficar neste bem assim, então o arquivo gerado
+    # seguirar o original do site. Foram feitas copias exatamente assim
+    # do original.
+    return f"""
+       \r{CONFIGURACAO_DA_TABELA}
+       \r    {LINHA_DE_LEGENDAS_DA_TABELA}
+       \r    {LINHAS}
+       \r    </table>
+    """
+
+if __name__ == "__main__":
+    carrega_banco_de_dados()
+    lista_bd = todos_cadastros()
+    transformacao = "".join([
+        COMENTARIO_DA_PAGINA,
+        TITULO_DA_PAGINA,
+        CABECALHO_DA_PAGINA,
+        CONFIGURACAO_DO_CORPO,
+        transforma_cadastros_em_linhas_de_tabela(lista_bd),
+        TAGS_FINAIS
+    ])
+    arquivo = open("site-visualizador.html", "wt")
+    print(transformacao, file=arquivo)
+    arquivo.close()
+
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
+#                                Testes Unitários                                           #
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
+class PrototipoDeGeracaoDaPagina(TestCase):
+    def runTest(self):
+        carrega_banco_de_dados()
+        lista_bd = todos_cadastros()
+        transformacao = "".join([
+            COMENTARIO_DA_PAGINA,
+            TITULO_DA_PAGINA,
+            CABECALHO_DA_PAGINA,
+            CONFIGURACAO_DO_CORPO,
+            transforma_cadastros_em_linhas_de_tabela(lista_bd),
+            TAGS_FINAIS
+        ])
+        print(transformacao)
+
+class CriandoLinhaPraTabelaComCadastro(TestCase):
+    def runTest(self):
+        carrega_banco_de_dados()
+
+        lista = todos_cadastros() 
+        escolha = choice(lista)
+
+        print(cria_linha_da_tabela(escolha))
+
+class ParsearBDPraLinhasDeTabelas(TestCase):
+    def runTest(self):
+        carrega_banco_de_dados()
+
+        lista = todos_cadastros() 
+        funcao = transforma_cadastros_em_linhas_de_tabela
+        resultado = funcao(lista)
+
+        print(resultado)
