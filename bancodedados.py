@@ -5,7 +5,7 @@ from datetime import (timedelta, datetime)
 from pprint import (pprint)
 from copy import (copy as CopiaObjeto)
 # Módulos pro próprio projeto:
-from modelos import (cadastro_e_valido)
+from modelos import (nome_cadastro, cadastro_e_valido)
 
 # O banco de dados dele é uma lista que contém todas pessoas já cadastradas pelo programa. Dentro dele,
 # cada cadastro será um dicionário do tipo 'string' e 'tupla'. A string é equivalente ao nome do 
@@ -22,11 +22,15 @@ BDD_INCIALIZADO          = False
 def adiciona_cadastro(registro: dict) -> None:
     "Apenas adiciona um 'cadastro' dado no banco de dados carregado na memória."
     global BANCO_DE_DADOS_CADASTROS, adicoes
+    TODOS_NOMES_DO_BANCO = map(nome_cadastro, BANCO_DE_DADOS_CADASTROS)
     
     if not cadastro_e_valido:
         if __debug__:
             print(registro)
         raise ValueError("Este tipo de dado não é válido.")
+
+    if nome_cadastro(registro) in TODOS_NOMES_DO_BANCO:
+        raise NameError("Entrada já existe!")
         
     BANCO_DE_DADOS_CADASTROS.append(registro)
     adicoes += 1
@@ -93,6 +97,37 @@ def todos_cadastros() -> list[dict]:
         raise Exception("É preciso inicializar o BDD primeiro antes de chamar tal função")
     else:
         return BANCO_DE_DADOS_CADASTROS[:]
+
+def busca_cadastro(nome: str):
+    """
+    Retorna uma consulta por nome no banco de dados. Se o nome realmente
+    bater com algum, ele retorna este único cadastro. Se o nome for apenas
+    o primeiro, e bastante comum, ele retorna uma lista de possíveis 
+    resultados. Se não corresponder a nada, ele apenas retorna 'null'.
+    """
+    global BANCO_DE_DADOS_CADASTROS
+
+    # Uma busca bem estrita. Verifica o nome completo.
+    for cadastro in BANCO_DE_DADOS_CADASTROS:
+        if nome_cadastro(cadastro).lower() == nome.lower():
+            return CopiaObjeto(cadastro)
+
+    # Verifica se há parte do nome.
+    similares = []
+    for cadastro in BANCO_DE_DADOS_CADASTROS:
+        # Nomes dados sem case sensitive.
+        nome_completo = nome_cadastro(cadastro).lower()
+        nome_entrada = nome.lower()
+
+        if nome_entrada in nome_completo:
+            clone = CopiaObjeto(cadastro)
+            similares.append(clone)
+    # Só retorna algo se foi coletado acima.
+    if len(similares) > 0:
+        return similares
+
+    return None
+        
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#
 #                                Funções Auxiliares                                         #
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#

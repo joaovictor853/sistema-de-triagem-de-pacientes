@@ -4,7 +4,7 @@
   pela gravidade.
 '''
 # Módulos pro próprio projeto:
-from bancodedados import (adiciona_cadastro, carrega_banco_de_dados, salva_banco_de_dados, todos_cadastros)
+from bancodedados import (adiciona_cadastro, carrega_banco_de_dados, salva_banco_de_dados, todos_cadastros, busca_cadastro)
 from interface import (
     cadastra_novo_usuario_agora, entrada_escolha_do_menu, visualizacao_do_menu, 
     listagem_de_cadastros, manual_de_ajuda_do_programa, cabecalho_padrao_do_hospital
@@ -20,7 +20,10 @@ from pprint import (pprint as Pprint)
 lá, será copiado e colocado aqui.
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
 """
-MENU_DE_OPCOES = ["Adicionar", "Remover", "Listar", "Info", "Ajuda", "Sair"]
+MENU_DE_OPCOES = [
+    "Adicionar", "Remover", "Listar", "Info","Consulta", 
+    "Ajuda", "Sair"
+]
 
 # Carrega todos os registros já feitos no banco de dados na memória.
 carrega_banco_de_dados()
@@ -67,8 +70,12 @@ while True:
             case 1:
                 #adiciona_cadastro(entrada_de_cadastro_agora())
                 novo = cadastra_novo_usuario_agora()
-                adiciona_cadastro(novo)
-                
+                try:
+                    adiciona_cadastro(novo)
+                except NameError:
+                    print("O nome já é cadastrado!")
+                finally:
+                    pass
             case 2:
                 pass
             case 3:
@@ -84,8 +91,23 @@ while True:
                 mostra_cadastro(recente)
 
             case 5:
-                manual_de_ajuda_do_programa()
+                prompt = input("\nDigite o nome completo: ")
+                resultado = busca_cadastro(prompt)
+
+                if resultado is not None and isinstance(resultado, dict):
+                    mostra_cadastro(resultado)
+                elif isinstance(resultado, list):
+                    print("\nNome dado é ambíguo. Aqui estão algumas opções:")
+
+                    for item in resultado:
+                        print(f'\t- {nome_cadastro(item)}')
+                    print("")
+
+                else:
+                    print(f"Não foi encontrado o nome '{prompt}'. Absolutamente nada!")
             case 6:
+                manual_de_ajuda_do_programa()
+            case 7:
                 print("Você pressionou para sair.")
                 break
             case _:

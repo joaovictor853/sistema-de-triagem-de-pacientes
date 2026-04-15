@@ -31,17 +31,24 @@ def seleciona_nome_aleatorio(nomes: list[str]) -> str:
 
 def datetime_aleatorio() -> datetime:
     "Cria um 'datetime' aleatório. O período da data em específico vária de 1980 à o ano atual."
-    ANO_ATUAL = datetime.today().year 
-    
-    return datetime(
+    AGORA = datetime.today()
+    ANO_ATUAL = AGORA.year 
+    NOVO_GERADO = datetime(
         hour=randint(0, 23),
         minute=randint(0, 59),
         second=randint(0, 59),
         # O hospital existe desde a década de 80.
-        year=randint(1980, ANO_ATUAL),
+        year=randint(1985, ANO_ATUAL),
         month=randint(1, 12),
         day=randint(1, 28)
     )
+
+    # Apenas aceita criações de uma data e horário do momento da execução.
+    # Qualque coisa que exceda, irá começar um loop até que conserte.
+    if NOVO_GERADO > AGORA:
+        return datetime_aleatorio()
+    else:
+        return NOVO_GERADO
 
 def cria_cadastro_aleatorio() -> dict:
     """
@@ -117,7 +124,7 @@ def adiciona_um_cadastro_de_forma_direta(novo: dict) -> None:
 if __name__ == "__main__":
     # Cria um cadastro agora, inserindo nome, idade e nível de dor apenas.
     #executa_programa_e_adiciona_um_cadastro_no_momento(cria_cadastro_aleatorio())
-    #adiciona_um_cadastro_de_forma_direta(cria_cadastro_aleatorio())
+    adiciona_um_cadastro_de_forma_direta(cria_cadastro_aleatorio())
     pass
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --#

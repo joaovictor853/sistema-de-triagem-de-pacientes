@@ -62,8 +62,16 @@ def cria_cadastro(nome: str, idade: int, nivel: int, criacao: datetime, modifica
     }
 
 def igualdade_cadastro(a: dict, b: dict) -> bool:
-    "Verifica se os cadastros 'a' e 'b' são iguais, nos termos deste programa, obviamente."
-    pass
+    """
+    Verifica se os cadastros 'a' e 'b' são iguais, nos termos deste programa, 
+    obviamente. Eles só serão iguais se, e somente se, os nomes forem iguais
+    e o tempo de criação entre eles for de um dia à uma semana.
+    """
+    assert cadastro_e_valido(a)
+    assert cadastro_e_valido(b)
+
+    diferenca = criacao_cadastro(a) - criacao_cadastro(b)
+    return diferenca < timedelta(weeks=1)
 
 # Metodos para consulta dos campos do 'Cadastro'. Como o tipo de dado abstrado
 # não é uma 'classe', estes 'métodos' não são ligados ao objeto.
@@ -106,11 +114,15 @@ def mostra_cadastro(cadastro: dict) -> None:
     idade = idade_cadastro(cadastro)
     nivel = nivel_de_dor_cadastro(cadastro)
     nivel = traducao_do_nivel_de_dor(nivel).capitalize()
+    data = cadastro[nome]["criação"]
+    datastr = data.strftime("%d/%m/%Y às %I%p")
 
     print(
-        f"""\r{OUTRO_RECUO}{nome}
-        \r{RECUO}- Nível de dor {nivel:.>19s}
-        \r{RECUO}- Idade {idade:.>19d}
+        f"""
+        \r{OUTRO_RECUO}{nome}
+        \r{RECUO}- Nível de dor {nivel:.>29s}
+        \r{RECUO}- Idade {idade:.>29d}
+        \r{RECUO}- Entrada {datastr:.>29s}
         """, 
     )
 
