@@ -22,6 +22,8 @@ from externo.legivel import (tempo as tempo_legivel)
 #    Instituto Salus
 #NOME_DO_HOSPITAL = "Centro Hospitalar Acadêmico Silva Brandão"
 NOME_DO_HOSPITAL = "Sociedade Hospitalar Dom Pedro II"
+# Caractére comum para criação da barra automática.
+TIJOLO_DA_BARRA = '-'
 
 def visualizacao_do_menu(*menus: list[str]) -> None:
     """
@@ -46,7 +48,7 @@ def visualizacao_do_menu(*menus: list[str]) -> None:
         maior = 7
 
     # Cria barra e imprime a descrição, neste caso: 'menu'.
-    print(barra_do_tamanho_da_tela('+'))
+    print(barra_do_tamanho_da_tela(TIJOLO_DA_BARRA))
     print("Menu:", end='\n\n')
 
     for (numeracao, opcao) in enumerate(menus):
@@ -58,7 +60,7 @@ def visualizacao_do_menu(*menus: list[str]) -> None:
         print(f"{RECUO}{numeracao + 1}) {opcao:<{maior}}", end='')
         cursor += 1
     # Espaçando e colocar a barra de baixo.
-    print(''); print(barra_do_tamanho_da_tela('+')); print('')
+    print(''); print(barra_do_tamanho_da_tela(TIJOLO_DA_BARRA)); print('')
 
 def listagem_de_cadastros() -> None:
     LISTA_DE_CADASTROS = todos_cadastros() 
@@ -144,7 +146,7 @@ def entrada_escolha_do_menu(menus: list[str]) -> int:
     assert all(map(lambda item: isinstance(item, str), menus))
     
     entrada = entrada_pura_de_dados()
-    print(barra_do_tamanho_da_tela('+'))
+    print(barra_do_tamanho_da_tela(TIJOLO_DA_BARRA))
 
     if entrada.isdigit():
         valor = int(entrada)
