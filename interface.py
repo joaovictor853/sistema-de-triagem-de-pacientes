@@ -6,7 +6,7 @@ from datetime import (datetime, timedelta)
 from bancodedados import (todos_cadastros)
 from modelos import (cria_cadastro, nome_cadastro)
 # Módulos de bibliotecas externas:
-from externo.legivel import (tempo as tempo_legivel)
+from externo.conversor import (tempo as tempo_legivel)
 
 # Nome genérico que "inventei". Na verdade, pedir para o 'Gemini' criar tal, mas baseado no seguinte
 # prompt: "Pode sugerir-me um nome de hospital, um que remeta a uma instituição antiga e respeitada."
