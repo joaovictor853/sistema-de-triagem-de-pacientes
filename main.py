@@ -151,11 +151,11 @@ while True:
                 if resultado is not None and isinstance(resultado, dict):
                     mostra_cadastro(resultado)
                 elif isinstance(resultado, list):
-                    print("\nNome dado é ambíguo. Aqui estão algumas opções:")
+                    print("\nNome dado é ambíguo. Aqui estão algumas opções:", end='\n\n')
 
                     for item in resultado:
                         print(f'\t- {nome_cadastro(item)}')
-                    print("")
+                    print("\n")
 
                 else:
                     print(f"Não foi encontrado o nome '{prompt}'. Absolutamente nada!")
