@@ -5,7 +5,7 @@ from datetime import (timedelta, datetime)
 from pprint import (pprint)
 from copy import (copy as CopiaObjeto)
 # Módulos pro próprio projeto:
-from modelos import (nome_cadastro, cadastro_e_valido)
+from modelos import (nome_cadastro, cadastro_e_valido, nome_cadastro)
 
 # O banco de dados dele é uma lista que contém todas pessoas já cadastradas pelo programa. Dentro dele,
 # cada cadastro será um dicionário do tipo 'string' e 'tupla'. A string é equivalente ao nome do 
@@ -53,6 +53,7 @@ def remove_cadastro(nome: str) -> bool:
                 return True
     return False
 
+            
 def salva_banco_de_dados() -> None:
     """
       Salva todas modificações ou inserções no 'banco de cadastros' em disco.
@@ -265,3 +266,4 @@ class MexendoComJSON(TestCase):
                 {"vitor": datetime.today().timestamp()}
             ]
             json.dump(amostras, database, indent=5)
+
