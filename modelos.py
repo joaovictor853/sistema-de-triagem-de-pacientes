@@ -74,6 +74,42 @@ def igualdade_cadastro(a: dict, b: dict) -> bool:
     diferenca = criacao_cadastro(a) - criacao_cadastro(b)
     return diferenca < timedelta(weeks=1)
 
+def maior_cadastro(a: dict, b: dict) -> bool:
+    """
+      Verifica se o cadastro[a] é maior que o cadastro[b], que neste caso
+    poderia se traduzido quem está numa situação mais grave de saúde. Ele não
+    apenas leva em consideração o 'estado' do paciente, mas também sua idade
+    e quanto tempo ele deu entrada.
+    """
+    assert cadastro_e_valido(a)
+    assert cadastro_e_valido(b)
+
+    if nivel_de_dor_cadastro(a) > nivel_de_dor_cadastro(b):
+        return True
+    # Se forem iguais, então determina-se por quem é mais velho.
+    elif nivel_de_dor_cadastro(a) == nivel_de_dor_cadastro(b):
+        # Se as idades forem iguais, então, começar a analisar por dad
+        # de entrada no hospital -- aqueles que estão a bastante tempo
+        # são menos grave(talvez por estarem mais estáveis). Aqui, parto
+        # de o 'a' ser mais velho.
+        if idade_cadastro(a) > idade_cadastro(b):
+            return True
+        elif idade_cadastro(a) == idade_cadastro(b):
+            # Se tiverem a mesma idade, então aí, o quesito de desempate é quem
+            # chegou mais recentemente no hospital.
+            if criacao_cadastro(a) < criacao_cadastro(b):            
+                return True
+            elif criacao_cadastro(a) == criacao_cadastro(b):
+                raise ValueError("Impossível chegar neste aqui. Dado corrompido!")
+            else:
+                return False
+        else:
+            return False
+    else:
+        # Não é mais grave nem igualmente, então é menos grave.
+        return False
+
+
 # Metodos para consulta dos campos do 'Cadastro'. Como o tipo de dado abstrado
 # não é uma 'classe', estes 'métodos' não são ligados ao objeto.
 def nome_cadastro(cadastro: dict) -> str:
@@ -117,16 +153,17 @@ def mostra_cadastro(cadastro: dict) -> None:
     nivel = nivel_de_dor_cadastro(cadastro)
     nivel = traducao_do_nivel_de_dor(nivel).capitalize()
     data = cadastro[nome]["criação"]
-    datastr = data.strftime("%d/%m/%Y às %I%p")
+    datastr = data.strftime("%b de %y, %I%p")
     # Já é sabido qual o maior rótulo.
     maior = len("Nível de dor")
+    espaco = len(RECUO) + 19
 
     print(
         f"""
         \r{OUTRO_RECUO}{nome}
-        \r{RECUO}- Nível de dor {nivel:.>29s}
-        \r{RECUO}- Idade {idade:.>29d}
-        \r{RECUO}- Entrada {datastr:.>29s}
+        \r{RECUO}- Estado {nivel:.>29s}
+        \r{RECUO}- Idade {idade:.>29d} anos
+        \r{RECUO}- Entrada {datastr:.>39s}
         """, 
     )
 
