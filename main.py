@@ -10,15 +10,17 @@ from bancodedados import (
     )
 from interface import (
     cadastra_novo_usuario_agora, entrada_escolha_do_menu, visualizacao_do_menu, 
-    listagem_de_cadastros, manual_de_ajuda_do_programa, cabecalho_padrao_do_hospital
+    listagem_de_cadastros, manual_de_ajuda_do_programa, cabecalho_padrao_do_hospital,
+    mostra_distribuicao_de_gravidade, mostra_uma_info_mais_geral, 
+    mostra_ultimos_e_primeiros_pacientes
     )
-from modelos import (cria_cadastro, nome_cadastro, criacao_cadastro, mostra_cadastro, 
-                     nivel_de_dor_cadastro, traducao_do_nivel_de_dor, idade_cadastro)
+from modelos import (nome_cadastro, mostra_cadastro)
 # Biblioteca padrão do Python:
 from pprint import (pprint as Pprint)
 from sys import (argv as Argumentos)
 import os
 from unittest import (TestCase)
+
 """
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
                                 Execução do Programa
@@ -27,88 +29,10 @@ lá, será copiado e colocado aqui.
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
 """
 MENU_DE_OPCOES = [
-    "Adicionar", "Remover", "Listar", "Info","Consulta", 
-    "Ajuda", "Sair"
+    "Adicionar", "Remover", "Listar", "Info", "Consulta", 
+    "Ordenação", "Ajuda", "Sair"
 ]
 
-
-def cadastro_mais_antigo_realizado() -> dict:
-    BANCO = todos_cadastros()
-    TOTAL_DE_CADASTROS = len(BANCO)
-    assert (TOTAL_DE_CADASTROS > 0)
-
-    maximo = BANCO[0]
-
-    for cadastro in BANCO[1:]:
-        a = criacao_cadastro(maximo)
-        b = criacao_cadastro(cadastro)
-
-        if b > a:
-            maximo = cadastro
-
-    return maximo
-        
-def cadastro_mais_recente_realizado() -> dict:
-    BANCO = todos_cadastros()
-    TOTAL_DE_CADASTROS = len(BANCO)
-    assert (TOTAL_DE_CADASTROS > 0)
-
-    minimo = BANCO[0]
-
-    for cadastro in BANCO[1:]:
-        a = criacao_cadastro(minimo)
-        b = criacao_cadastro(cadastro)
-
-        if b < a:
-            minimo = cadastro
-
-    return minimo
-
-def computa_a_distribuicao_da_triagem() -> dict:
-    lista = todos_cadastros()
-    distribuicao = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-    
-    for cadastro in lista:
-        indice = nivel_de_dor_cadastro(cadastro)
-        distribuicao[indice] += 1
-    
-    total = sum(distribuicao.values())
-
-    # Convertendo tudo em percentuais.
-    for indice in range(1, 5 + 1):
-        contagem = distribuicao[indice]
-        distribuicao[indice] = contagem / total
-    return distribuicao
-      
-def media_de_idade() -> int:
-    lista_completa = todos_cadastros()
-    quantidade = len(lista_completa)
-    
-    return int(sum(map(idade_cadastro, lista_completa)) / quantidade)
-
-def mostra_distribuicao_de_gravidade():
-    distribuicao = computa_a_distribuicao_da_triagem()
-    
-    print("\nComo estão dividido a triagem dos pacientes cadastros:")
-    
-    for (tipo, percentual) in distribuicao.items():
-        estado = traducao_do_nivel_de_dor(tipo)
-        
-        print(f"\t{estado.capitalize():<20s} ~{percentual * 100.0:0.1f}%")
-
-def mostra_uma_info_mais_geral():
-    total = len(todos_cadastros())
-    
-    print(f"\nO total de inserções é {total} cadastros.")
-    print(f"A média de idade é {media_de_idade()} anos.")
-    print("\nOs cadastros mais velhos e novos feitos:")
-
-def mostra_ultimos_e_primeiros_pacientes():
-    antigo = cadastro_mais_antigo_realizado()
-    recente = cadastro_mais_recente_realizado()
-    
-    mostra_cadastro(antigo)
-    mostra_cadastro(recente)
 
 if __name__ == "__main__":
     # Carrega todos os registros já feitos no banco de dados na memória.
@@ -126,7 +50,6 @@ if __name__ == "__main__":
         try:
             match entrada_escolha_do_menu(MENU_DE_OPCOES):
                 case 1:
-                    #adiciona_cadastro(entrada_de_cadastro_agora())
                     novo = cadastra_novo_usuario_agora()
                     try:
                         adiciona_cadastro(novo)
@@ -135,16 +58,19 @@ if __name__ == "__main__":
                     finally:
                         pass
                 case 2:
-                    remove_paciente = input('Digite o nome do paciente que deseja remover: ').strip()
+                    remove_paciente = input('\n\tNome do paciente à remover: ').strip()
                     texto_validacao = remove_paciente.replace(" ", '')
+                    # Proposições(deste modo fica mais organizado):
+                    E_UMA_STRING_VAZIA     = (remove_paciente == "")
+                    CARACTERES_NAO_VALIDOS = (not texto_validacao.isalpha())
                     
-                    if remove_paciente == "" or not texto_validacao.isalpha():
-                        print("Erro: Por favor, digite um nome válido contendo apenas letras.")
+                    if E_UMA_STRING_VAZIA or CARACTERES_NAO_VALIDOS:
+                        print("Erro: Por favor, digite um nome válido contendo apenas letras.", end='\n\n')
                     else:
                         if remove_cadastro(remove_paciente):
-                            print(f'Paciente {remove_paciente} removido com SUCESSO!')
+                            print(f'\n\tPaciente {remove_paciente} removido com SUCESSO!', end='\n\n')
                         else:
-                            print(f'O paciente \'{remove_paciente}\' não foi encontrado!')
+                            print(f'\n\tO paciente \'{remove_paciente}\' não foi encontrado!', end='\n\n')
                 case 3:
                     listagem_de_cadastros()
                 case 4:
@@ -169,8 +95,12 @@ if __name__ == "__main__":
                     else:
                         print(f"Não foi encontrado o nome '{prompt}'. Absolutamente nada!")
                 case 6:
-                    manual_de_ajuda_do_programa()
+                    escolha = input("Alterar ordem prá: ")
+                    alterna_ordenacao(escolha)
+                    pass
                 case 7:
+                    manual_de_ajuda_do_programa()
+                case 8:
                     print("Você pressionou para sair.")
                     break
                 case _:
