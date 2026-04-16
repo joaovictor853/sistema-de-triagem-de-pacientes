@@ -9,6 +9,7 @@ from interface import (NOME_DO_HOSPITAL)
 from modelos import (traducao_do_nivel_de_dor, nome_cadastro, idade_cadastro,
                      nivel_de_dor_cadastro, cadastro_e_valido,
                      criacao_cadastro)
+from processamento import (ordena_cadastros_por_estado)
 
 
 # Como esta parte é meio que estática, pode ser definida na inicialização. Viram simples
@@ -50,7 +51,7 @@ TAGS_FINAIS = "</body>\n</html>\n"
 
 
 def cor_especifica_para_nivel_de_dor(nivel: int) -> str:
-   "Seleciona uma cor baseado no estado de saúde do paciente(de 1 à 5)."
+    "Seleciona uma cor baseado no estado de saúde do paciente(de 1 à 5)."
     assert isinstance(nivel, int)
 
     match nivel:
@@ -141,6 +142,7 @@ if __name__ == "__main__":
     carrega_banco_de_dados()
     lista_bd = todos_cadastros()
 
+    ordena_cadastros_por_estado(lista_bd)
     print("A criação da página ...", end=' ')
     transformacao = "".join([
         COMENTARIO_DA_PAGINA,
